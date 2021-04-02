@@ -7,5 +7,37 @@ output: pdf_document
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
+
+library(tidyverse)
+```
+
+
+
+##Part 1 - Data Wrangling
+
+
+```{r Import Data q2}
+# First import
+df1 <- read.csv("./Datasets/Data.Bourne_FledglingSurvival.csv",
+                header = TRUE)
+#Convert to tibble
+df1 <- tibble(df1)
+
+# Second Import
+df2 <- read.csv("./Datasets/Data.Bourne_NestlingsAllData.csv",
+                header = TRUE)
+df2 <- tibble(df2)
+
+# Third Import
+df3 <- read.csv("./Datasets/Data.Bourne_NestSuccess.csv",
+                header = TRUE)
+df3 <- tibble(df3)
+```
+
+```{r merge two datasets q3 }
+colnames()
+
+Spiedbabbler<
+
 ```
 
