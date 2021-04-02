@@ -48,7 +48,7 @@ head(df3,5)
 ```
 
 
-```{r clean up dataframes}
+```{r clean up dataframes q1.3}
 df1 <- df1 %>% 
     rename(Group=GRP)%>% 
     mutate(Date = dmy(Date),
@@ -66,6 +66,7 @@ df1 <- df1 %>%
            Season=str_replace_all(Season, " ", ""),
            NestID=str_replace_all(NestID, " ", ""),
            GrpSizeAD=as.numeric(GrpSizeAD),
+           GrpSizeTotal=as.numeric(GrpSizeTotal),
            X.Imm=as.numeric(X.Imm)
            )%>%
     arrange(BirdID,Date,Group,Season)
@@ -80,17 +81,57 @@ df2 <- df2 %>%
            NestID=str_replace_all(NestID, " ", ""),) %>% 
     arrange(BirdID,Date,Group,Season)
 
+head(df1)
 
 # NAs introduces by coercion
 ```
-```{r merge}
+```{r merge q1.3}
 Spiedbabbler <- df1%>% left_join(df2,by=c('Date','BirdID','Group','Season','NestID'))
+
+Spiedbabbler <- df1%>% left_join(df2)
 
 head(Spiedbabbler,5)
 print(dim(df1))
 print(dim(df2))
 print(dim(Spiedbabbler))
 #Nestling comes first!
+
+```
+
+##Part 2
+
+```{r q2.1}
+#Total Sample Size Per Year
+Spiedbabbler %>%
+    mutate(year=year(Date)) %>%
+    select(c(year,BirdID))%>%
+    group_by(year)%>%
+    summarise(n = n())
+    # summarise(sample_size==count(BirdID))
+
+```
+
+```{r q2.2 outliers}
+
+```
+
+```{r q2.3 }
+
+```
+
+```{r q2.4}
+
+```
+
+```{r q2.5}
+
+```
+
+```{r q2.6}
+
+```
+
+```{r q2.7}
 
 ```
 
