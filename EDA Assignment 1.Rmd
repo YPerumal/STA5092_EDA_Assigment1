@@ -86,52 +86,105 @@ head(df1)
 # NAs introduces by coercion
 ```
 ```{r merge q1.3}
-Spiedbabbler <- df1%>% left_join(df2,by=c('Date','BirdID','Group','Season','NestID'))
+#V1
+# Spiedbabbler <- df1%>% left_join(df2,by=c('Date','BirdID','Group','Season','NestID'))
 
+# V2
 Spiedbabbler <- df1%>% left_join(df2)
-
-head(Spiedbabbler,5)
-print(dim(df1))
-print(dim(df2))
-print(dim(Spiedbabbler))
+# head(Spiedbabbler,5)
+# print(dim(df1))
+# print(dim(df2))
+# print(dim(Spiedbabbler))
 #Nestling comes first!
-
 ```
 
 ##Part 2
 
 ```{r q2.1}
 #Total Sample Size Per Year
-Spiedbabbler %>%
+size_per_year <-Spiedbabbler %>%
     mutate(year=year(Date)) %>%
     select(c(year,BirdID))%>%
     group_by(year)%>%
     summarise(n = n())
     # summarise(sample_size==count(BirdID))
-
+size_per_year
 ```
 
 ```{r q2.2 outliers}
+#Check for nulls per column
+miss_val <-Spiedbabbler %>%
+    select(c(GrpSizeAD,GrpSizeTotal,BroodSize,Mass,TMaxMeas,
+             No.ChicksFledge,TotRain,Drought))%>%
+    sapply(function(x) sum(is.na(x)))
+#Print in a nice table?
+miss_val
+
+# Looking for outliers
+Spiedbabbler %>%
+    select(c(GrpSizeAD,GrpSizeTotal,BroodSize,Mass,TMaxMeas,
+             No.ChicksFledge,TotRain,Drought))%>%
+    boxplot()
+?boxplot
+    
+```
+Definition of an outlier is those that are more than 3???? standard deviations away from the mean
+
+```{r q2.3 outliers}
+# ????? The Question here is so vague!
+
+Spiedbabbler%>%
+    select(NestID,Date,Mass)
+    group_by(NestID)
 
 ```
 
-```{r q2.3 }
+NEED TO COME BACK TO THIS ONE
+```{r q2.4} 
+head(Spiedbabbler)
+unique(Spiedbabbler$Season)
 
+
+# Spiedbabbler%>%
+#     select(Season,TMaxMeas,TMinMeas,TvarMeas)
+#     na.omit()%>%
+   # summarise(average_high_temp=mean(TMaxMeas),average_low_temp=mean(TMinMeas))%>%
+       
+Spiedbabbler%>%
+    select(Date,Season,TMaxMeas,TMinMeas)%>%
+    ggplot(aes(x=Date,y=TMaxMeas,color=Season))+
+    geom_point(na.rm = T)
 ```
 
-```{r q2.4}
 
-```
-
-```{r q2.5}
+```{r q2.5 }
+Spiedbabbler%>%
+    select(NestID,Date,Mass,Season)%>%
+    group_by(NestID,Date,Season)%>%
+    summarise(avg_mass=mean(Mass))%>%
+    ggplot(aes(x=Date,y=avg_mass,color=Season))+
+    geom_point()+
+    facet_wrap(~Season)
 
 ```
 
 ```{r q2.6}
+Spiedbabbler%>%
+    mutate(year=year(Date))%>%
+    select(year,Mass,BroodSize,GrpSizeTotal,No.ChicksFledge,TotRain,Season,Drought)%>%
+    group_by(year,Season)%>%
+    summarise(avg_mass=mean(Mass),mean_broodsize=mean(BroodSize),
+              avg_grp_size=mean(GrpSizeTotal),avg_fledg_count=mean(No.ChicksFledge),
+              avg_rain=mean(TotRain))%>%
+    ggplot(aes(x=year))+
+    geom_point(aes(y=avg_mass))+
+    facet_grid(~Season)
 
+# str(Spiedbabbler)
 ```
 
 ```{r q2.7}
 
 ```
+
 
