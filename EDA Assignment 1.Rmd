@@ -14,7 +14,7 @@ library(gridExtra)
 ```
 
 ## Summary of data
-Data were collected for each breeding season from September 2005 - February 2019 for the Southern Pied Babbler.
+Data was collected for each breeding season from September 2005 - February 2019 for the Southern Pied Babbler.
 The data consists of 6 csv files; 3 files containing data and 3 files containing metadata describing the fields in each data set. Below we import, wrangle and explore some of the data.
 
 ## Part 1 - Data Wrangling
@@ -240,6 +240,7 @@ knitr::kable(
 The dimensions of the table are `r dim(mass_by_nest)[1]` rows and `r dim(mass_by_nest)[2]` columns.
 
 2.4)
+
 ```{r q2.4, echo=FALSE, message=FALSE}
 Spiedbabbler%>%
   select(Date,TvarMeas,TMinMeas,TMaxMeas,Season)%>%
@@ -260,7 +261,7 @@ Spiedbabbler%>%
 ?scale_color_hue
 ```
 The figure above shows us how the average temperature range, the average maximum temperature and the average minimum temperature changed on a monthly basis for different seasons. This gives us an of whether one season had more extreme temperatures and temperature variance when compared to another.
-
+\newpage
 2.5)
 
 ```{r q2.5, echo=FALSE, message=FALSE,fig.height=8, fig.width=15}
@@ -277,7 +278,8 @@ Spiedbabbler%>%
     facet_wrap(~Season,scales='free_x')
     # theme(axis.text.x = element_text(angle=45, vjust=0.5))
 ```
-\newpage
+A quick overview does not reveal any obvious trends of how the total mass of nests may have changed over time.
+
 2.6)
 ```{r q2.6, echo=FALSE, message=FALSE}
 #Create year column,find averages, then craete a facet on Season for each variable.
