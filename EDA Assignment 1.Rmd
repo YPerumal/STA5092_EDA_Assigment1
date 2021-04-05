@@ -14,10 +14,8 @@ library(gridExtra)
 ```
 
 ## Summary of data
-The data set is availale at the following link:
-https://zivahub.uct.ac.za/articles/dataset/Southern_Pied_Babbler_nestling_mass_tarsus_length_and_survival/12441899
-
 Data were collected for each austral summer breeding season from September 2005February 2019 (14 breeding seasons in total).
+The data consists of 6 csv files; 3 files containing data and 3 files containing metadata describing the fields in each data set. Below we import, wrangle and explore some of the data.
 
 ## Part 1 - Data Wrangling
 ```{r Import Data q2, include=FALSE}
@@ -25,12 +23,9 @@ Data were collected for each austral summer breeding season from September 2005F
 df1 <- read.csv("./Datasets/Data.Bourne_NestlingsAllData.csv", header = TRUE)
 df1 <- tibble(df1) #Convert to tibble
 
-
 # Second import Fledgeling comes second
 df2 <- read.csv("./Datasets/Data.Bourne_FledglingSurvival.csv", header = TRUE)
 df2 <- tibble(df2) #Convert to tibble
-
-
 
 # Third Import
 df3 <- read.csv("./Datasets/Data.Bourne_NestSuccess.csv", header = TRUE)
@@ -115,6 +110,7 @@ Spiedbabbler <- df1%>% left_join(df2)
 d <- dim(Spiedbabbler)
 ```
 The dimensions of the merged data set are  `r d[1]` rows and `r d[2]` columns.
+The nestling data was used as the base as this is the earlier developmental stage before they become fledglings.Some birds do not make it to fledgling thus the nestling data has more rows/birds. Therefore, the fledgling data is left-joined to nestlings to get the most complete picture possible.
 
 ## Part 2
 2.1)The Total Sample Size Per Year:
@@ -124,7 +120,7 @@ size_per_year <-Spiedbabbler %>%
     mutate(year=year(Date)) %>%
     select(c(year,BirdID))%>%
     group_by(year)%>%
-    summarise(n = n())
+    summarise('Sample Size' = n())
     # summarise(sample_size==count(BirdID))
 
 
@@ -142,27 +138,22 @@ miss_val <-Spiedbabbler %>%
     select(c(GrpSizeAD,GrpSizeTotal,BroodSize,Mass,TMaxMeas,
              No.ChicksFledge,TotRain,Drought))%>%
     sapply(function(x) sum(is.na(x)))
-#Print in a nice table?
-# miss_val
 
-# ?knitr::kable
+#Print as table
 knitr::kable(
   miss_val, 
   caption = "Number of Missing Values in Selected Fields",
+  col.names =c("Count")
 )
 
 ```
+The occurance of nulls indicates we need to be cater for them when plotting or modeling with these
+fields.
 \newpage
 2.2.2)Boxplots to allow us to look for outliers:
 
 ```{r q2.2 outliers, echo=FALSE}
-# v1
-# Spiedbabbler %>%
-#     select(c(GrpSizeAD,GrpSizeTotal,BroodSize,Mass,TMaxMeas,
-#              No.ChicksFledge,TotRain,Drought))%>%
-#     boxplot()
-
-# V2
+# Create a boxplot for each of the variable of interest
 b1<-Spiedbabbler %>%
     select(c(GrpSizeAD,GrpSizeTotal,BroodSize,Mass,TMaxMeas,
              No.ChicksFledge,TotRain,Drought))%>%
@@ -211,10 +202,11 @@ b8 <- Spiedbabbler %>%
     ggplot(aes(y=Drought))+
     geom_boxplot(na.rm = T)
 
-grid.arrange(b1,b2,b3,b4,b5,b6,b7,b8, nrow = 2,ncol=4)
+#Place all boxplots on to one plot
+grid.arrange(b1,b2,b3,b4,b5,b6,b7,b8, nrow = 2,ncol=4,top = "Boxplots of Variables to Find Outliers")
 ```
 
-An outlier is an observation that lies 1.5 times the interquartile range, either below the lower quartile or above the upper quartile i.e. any obersvations further out than the "whiskers' on a box plot.
+An outlier is an observation that lies at or further away than 1.5 times the interquartile range, either below the lower quartile or above the upper quartile i.e. any observations further out than the "whiskers' on a box plot.
 
 The following variables appear to have 1 or more outliers:
 
@@ -229,19 +221,20 @@ The following variable appear to not have outliers:
 * No.ChicksFledge
 * TotRain
 
-The variable Drought appears to be a binary indicator (1/0) as to whether a drought occurred in that year, and thus would not have any outliers (unless there were errors in the data).
+The variable Drought appears to be a binary indicator (1/0) as to whether a drought occurred, and thus would not have any outliers; despite what the boxplot appears to indicate "1" is a valid observation and not an outlier
 
 2.3)
 ```{r q2.3 per nest per date mass, echo=FALSE, message=FALSE}
+#Code to find total mass per nest per date
 mass_by_nest<-Spiedbabbler%>%
     select(NestID,Date,Mass)%>%
     group_by(NestID,Date)%>%
-    summarise('Average Mass'=round(mean(Mass),2),'Total Mass'=sum(Mass))%>%
+    summarise('Total Mass'=sum(Mass))%>%
     arrange(NestID,Date)
-
+#Print result in a table
 knitr::kable(
   head(mass_by_nest,5), 
-  caption = "Preview of DataFrame Mass and Date per Nest"
+  caption = "Preview of Mass and Date per Nest"
 )
 ```
 The dimensions of the table are `r dim(mass_by_nest)[1]` rows and `r dim(mass_by_nest)[2]` columns.
@@ -267,12 +260,13 @@ diff
 
 # %>%
 #     mutate(rn=row_number())
-knitr::kable(
-  diff,
-  caption = "Comparison of Temperature Measures per Season",
-  "html",
-  digits=2
-)
+# knitr::kable(
+#   diff,
+#   caption = "Comparison of Temperature Measures per Season",
+#   digits=2
+# )
+
+
 # plto_labs <- list(diff$Season)
 # typeof(plto_labs)
 # diff %>% ggplot(aes(x=factor(rn),y=mean_change))+
@@ -284,21 +278,25 @@ From the table we see that both maximum and minimum temperatures appear to be on
 2.5)
 
 ```{r q2.5, echo=FALSE, message=FALSE}
+#Create the required plot
 Spiedbabbler%>%
     select(NestID,Date,Mass,Season)%>%
     group_by(NestID,Date,Season)%>%
-    summarise(avg_mass=mean(Mass))%>%
-    ggplot(aes(x=Date,y=avg_mass,color=Season))+
+    summarise(sum_mass=sum(Mass))%>%
+    ggplot(aes(x=Date,y=sum_mass,color=Season))+
     geom_point(na.rm = T)+
     ylab("Season")+
     labs(title = "Average Mass per Nest Over Time,faceted per Season")+
     facet_wrap(~Season,scales='free_x')
 
 ```
+*Apologies for the squashed axis on the graphics.
 \newpage
 2.6)
 
 ```{r q2.6, echo=FALSE, message=FALSE}
+#Create year column,find averages, then craete a facet on Season for each variable.
+
 p1 <-Spiedbabbler%>%
     mutate(year=year(Date))%>%
     select(year,Mass,BroodSize,GrpSizeTotal,No.ChicksFledge,TotRain,Season,Drought)%>%
@@ -307,8 +305,8 @@ p1 <-Spiedbabbler%>%
     summarise(avg_mass=mean(Mass),mean_broodsize=mean(BroodSize),
               avg_grp_size=mean(GrpSizeTotal),avg_fledg_count=mean(No.ChicksFledge),
               avg_rain=mean(TotRain))%>%
-    ggplot(aes(x=year))+
-    geom_point(aes(y=avg_mass))+
+    ggplot(aes(x=year,y=avg_mass))+
+    geom_bar(stat="identity")+
     facet_wrap(~Season,scales = 'free_y')+
     xlab("Year")+
     ylab("Average Mass")
@@ -321,8 +319,8 @@ p2 <-Spiedbabbler%>%
     summarise(avg_mass=mean(Mass),mean_broodsize=mean(BroodSize),
               avg_grp_size=mean(GrpSizeTotal),avg_fledg_count=mean(No.ChicksFledge),
               avg_rain=mean(TotRain))%>%
-    ggplot(aes(x=year))+
-    geom_point(aes(y=mean_broodsize))+
+    ggplot(aes(x=year,y=mean_broodsize))+
+    geom_bar(stat="identity")+
     facet_wrap(~Season,scales = 'free_y')+
     xlab("Year")+
     ylab("Average Brood Size")
@@ -336,8 +334,8 @@ p3 <-Spiedbabbler%>%
     summarise(avg_mass=mean(Mass),mean_broodsize=mean(BroodSize),
               avg_grp_size=mean(GrpSizeTotal),avg_fledg_count=mean(No.ChicksFledge),
               avg_rain=mean(TotRain))%>%
-    ggplot(aes(x=year))+
-    geom_point(aes(y=avg_grp_size))+
+    ggplot(aes(x=year,y=avg_grp_size))+
+    geom_bar(stat = "identity")+
     facet_wrap(~Season,scales = 'free_y')+
     xlab("Year")+
     ylab("Average Total Group Size")
@@ -350,8 +348,8 @@ p4 <-Spiedbabbler%>%
     summarise(avg_mass=mean(Mass),mean_broodsize=mean(BroodSize),
               avg_grp_size=mean(GrpSizeTotal),avg_fledg_count=mean(No.ChicksFledge),
               avg_rain=mean(TotRain))%>%
-    ggplot(aes(x=year))+
-    geom_point(aes(y=avg_fledg_count))+
+    ggplot(aes(x=year,y=avg_fledg_count))+
+    geom_bar(stat = "identity")+
     facet_wrap(~Season,scales = 'free_y')+
     xlab("Year")+
     ylab("Average No. of Fledgling Chicks")
@@ -364,8 +362,8 @@ p5 <-Spiedbabbler%>%
     summarise(avg_mass=mean(Mass),mean_broodsize=mean(BroodSize),
               avg_grp_size=mean(GrpSizeTotal),avg_fledg_count=mean(No.ChicksFledge),
               avg_rain=mean(TotRain))%>%
-    ggplot(aes(x=year))+
-    geom_point(aes(y=avg_rain))+
+    ggplot(aes(x=year,y=avg_rain))+
+    geom_bar(stat = "identity")+
     facet_wrap(~Season,scales = 'free_y')+
     xlab("Year")+
     ylab("Average Total Rainfall")
@@ -374,32 +372,52 @@ p5 <-Spiedbabbler%>%
 ```
 
 ```{r echo=FALSE ,fig.height=4, fig.width=10}
-p1
+p1+labs(title="Average Mass per Year by Season")
 ```
 ```{r echo=FALSE,fig.height=4, fig.width=10}
-p2
+p2+labs(title="Average Brood Size per Year by Season")
 ```
 ```{r echo=FALSE,fig.height=4, fig.width=10}
-p3
+p3+labs(title="Average Total Group Size per Year by Season")
 ```
 ```{r echo=FALSE,fig.height=4, fig.width=10}
-p4
+p4+labs(title="Average No. of Fledgling Chicks per Year by Season")
 ```
 ```{r echo=FALSE,fig.height=4, fig.width=10}
-p5
+p5+labs(title="Average Total Rainfall per Year by Season")
 ```
-2.7)
+2.7) The study this data was collected for was investigating if the survivability of the young birds at different developmental stages is affected by environmental conditions and/or group size.
+Therefore it makes sense to plot a graphic with an environmental factor such as temperature against the number of young that survive.
 
 ```{r q2.7, echo=FALSE}
+# Spiedbabbler%>%
+#   mutate(year=year(Date))%>%
+#   select(year,BirdID,Sex,TMaxMeas)%>%
+#   group_by(year,Sex)%>%
+#   ggplot(aes(x=year,fill=Sex))+
+#   geom_bar(position = "dodge")+
+#   labs(title = "Distrubtion of Observed Sex over Time")+
+#   ylab('Number of Birds')+
+#   xlab("Years")+
+#   geom_line(aes(y=TMaxMeas))
+
+sum(is.na(Spiedbabbler$SurvInd))
+unique(Spiedbabbler$SurvInd)
+
 Spiedbabbler%>%
-  mutate(year=year(Date))%>%
-  select(year,BirdID,Sex)%>%
-  group_by(year,Sex)%>%
-  ggplot(aes(x=year,fill=Sex))+
-  geom_bar(position = "dodge")+
-  labs(title = "Distrubtion of Observed Sex over Time")+
-  ylab('Number of Birds')+
-  xlab("Years")
+  select(Season,SurvInd,TMaxMeas)%>%
+  na.omit%>% #Remove NA observations
+  group_by(Season)%>%
+  summarise(sum_surv=sum(SurvInd),mean_max_temp=mean(TMaxMeas))%>%
+  ggplot(aes(x=Season))+
+  geom_bar(aes(y=sum_surv),stat = "identity",fill="red",alpha=0.4)+
+  geom_point(aes(y=mean_max_temp,col=mean_max_temp))+
+  ylab('No of Chicks Surviving to 90days')+
+  labs(title = "Number of Chicks Surviving to Nutritional Independance by Season")+
+  scale_color_continuous(name="Max Temp")
+
+
 ```
+From the figure above, it does appear that higher maximum temperatures could affect the survivability of young birds. The two seasons with the highest survivability numbers are those with the lowest maximum temperature. However, this is not concrete enough evidence and warrants further investigation and testing.
 
 
