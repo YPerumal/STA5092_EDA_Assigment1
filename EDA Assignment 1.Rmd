@@ -64,6 +64,7 @@ Before merging the Nestling and Fledgling dataframes, several actions need to be
 It does appear from NAs were introduced during the data conversion of characater to numeric, which are for fields that did not have any data to start with.
 
 ```{r clean up dataframes q1.3, include=FALSE,echo=FALSE}
+# clean up dataframes
 df1 <- df1 %>% 
     rename(Group=GRP)%>% 
     mutate(Date = dmy(Date),
@@ -97,6 +98,7 @@ df2 <- df2 %>%
 ```
 
 ```{r merge q1.3, include=FALSE}
+# merge
 #V1
 # Spiedbabbler <- df1%>% left_join(df2,by=c('Date','BirdID','Group','Season','NestID'))
 
@@ -242,6 +244,7 @@ The dimensions of the table are `r dim(mass_by_nest)[1]` rows and `r dim(mass_by
 2.4)
 
 ```{r q2.4, echo=FALSE, message=FALSE}
+# q2.4
 Spiedbabbler%>%
   select(Date,TvarMeas,TMinMeas,TMaxMeas,Season)%>%
   mutate(month=month(Date,label = TRUE))%>%
@@ -258,14 +261,13 @@ Spiedbabbler%>%
   xlab("Month")+
   labs(title = "Comparison of Various Monthly Average Temperature Metrics by Season")+
   scale_color_hue(name = "Temp Variable",labels = c("Avg Daily Temp Range", "Avg Min Temp","Avg Max Temp"))
-?scale_color_hue
 ```
 The figure above shows us how the average temperature range, the average maximum temperature and the average minimum temperature changed on a monthly basis for different seasons. This gives us an of whether one season had more extreme temperatures and temperature variance when compared to another.
 \newpage
 2.5)
 
 ```{r q2.5, echo=FALSE, message=FALSE,fig.height=8, fig.width=15}
-#Create the required plot
+#Create the required plot q2.5
 Spiedbabbler%>%
     select(NestID,Date,Mass,Season)%>%
     group_by(NestID,Date,Season)%>%
@@ -282,7 +284,7 @@ A quick overview does not reveal any obvious trends of how the total mass of nes
 
 2.6)
 ```{r q2.6, echo=FALSE, message=FALSE}
-#Create year column,find averages, then craete a facet on Season for each variable.
+#Create year column,find averages, then create a facet on Season for each variable.
 
 p1 <-Spiedbabbler%>%
     mutate(year=year(Date))%>%
@@ -355,7 +357,6 @@ p5 <-Spiedbabbler%>%
     xlab("Year")+
     ylab("Average Total Rainfall")
 
-# str(Spiedbabbler)
 ```
 
 ```{r echo=FALSE ,fig.height=4, fig.width=10}
@@ -404,4 +405,13 @@ Spiedbabbler%>%
 ```
 From the figure above, it does appear that higher maximum temperatures could affect the survivability of young birds. The two seasons with the highest survivability numbers are those with the lowest maximum temperature. However, this is not concrete enough evidence and warrants further investigation and testing.
 
+\newpage
+## Appendix
+
+```{r}
+# Appendix: All code for this report
+
+```{r ref.label=knitr::all_labels(), echo=TRUE, eval=FALSE}
+```
+```
 
