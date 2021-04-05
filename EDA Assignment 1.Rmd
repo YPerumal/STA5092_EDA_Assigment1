@@ -22,7 +22,7 @@ Data were collected for each austral summer breeding season from September 2005F
 ## Part 1 - Data Wrangling
 
 
-```{r Import Data q2}
+```{r Import Data q2, include=FALSE}
 # First Import Nestling comes first
 df1 <- read.csv("./Datasets/Data.Bourne_NestlingsAllData.csv", header = TRUE)
 df1 <- tibble(df1) #Convert to tibble
@@ -40,19 +40,19 @@ df3 <- tibble(df3)  #Convert to tibble
 ```
 
 A preview of the dataset named Data.Bourne_NestlingsAllData.csv
-```{r df1 }
+```{r df1, echo=FALSE}
 head(df1,5)
 # sum(is.na(df1$Date)) #No nulls in the date column
 ```
 
 
 A preview of the dataset named Data.Bourne_FledglingSurvival.csv
-```{r df2 } 
+```{r df2 echo=FALSE} 
 head(df2,5)
 # sum(is.na(df2$Date)) #No nulls in the date column
 ```
 A preview of the dataset named Data.Bourne_NestSuccess.csv:
-```{r df3 }
+```{r df3 echo=FALSE}
 head(df3,5)
 ```
 
@@ -70,7 +70,7 @@ Before merging the Nestling and Fledgling dataframes, several actions need to be
 
 It does appear from NAs were introduced during the data conversion of characater to numeric, which are for fields that did not have any data to start with.
 
-```{r clean up dataframes q1.3, include=FALSE}
+```{r clean up dataframes q1.3, include=FALSE,echo=FALSE}
 df1 <- df1 %>% 
     rename(Group=GRP)%>% 
     mutate(Date = dmy(Date),
@@ -103,7 +103,7 @@ df2 <- df2 %>%
     arrange(BirdID,Date,Group,Season)
 ```
 
-```{r merge q1.3}
+```{r merge q1.3 ,echo=FALSE}
 #V1
 # Spiedbabbler <- df1%>% left_join(df2,by=c('Date','BirdID','Group','Season','NestID'))
 
@@ -140,7 +140,7 @@ knitr::kable(
 ```
 
 
-```{r q2.2 Nulls}
+```{r q2.2 Nulls,echo=FALSE}
 #Check for nulls per column
 miss_val <-Spiedbabbler %>%
     select(c(GrpSizeAD,GrpSizeTotal,BroodSize,Mass,TMaxMeas,
@@ -158,7 +158,7 @@ knitr::kable(
 ```
 
 Boxplots to allow us to look for outliers:
-```{r q2.2 outliers}
+```{r q2.2 outliers echo=FALSE}
 # v1
 # Spiedbabbler %>%
 #     select(c(GrpSizeAD,GrpSizeTotal,BroodSize,Mass,TMaxMeas,
@@ -232,12 +232,13 @@ The following variable appear to not have outliers:
 
 The variable Drought appears to be a binary indicator (1/0) as to whether a drought occurred in that year, and thus would not have any outliers (unless there were errors in the data).
 
-```{r q2.3 per nest per date mass}
+```{r q2.3 per nest per date mass echo=FALSE}
 mass_by_nest<-Spiedbabbler%>%
     select(NestID,Date,Mass)%>%
     group_by(NestID,Date)%>%
     summarise('Average Mass'=round(mean(Mass),2),'Total Mass'=sum(Mass))%>%
     arrange(NestID,Date)
+
 mass_by_nest    
 knitr::kable(
   head(mass_by_nest,5), 
@@ -247,11 +248,7 @@ knitr::kable(
 The dimensions of the table are `r dim(mass_by_nest)[1]` rows and `r dim(mass_by_nest)[2]` columns.
 
 NEED TO COME BACK TO THIS ONE
-```{r q2.4} 
-head(Spiedbabbler)
-unique(Spiedbabbler$Season)
-
-
+```{r q2.4 echo=FALSE} 
 # Spiedbabbler%>%
 #     select(Season,TMaxMeas,TMinMeas,TvarMeas)
 #     na.omit()%>%
@@ -285,7 +282,7 @@ diff
 ```
 From the table we see that both maximum and minimum temperatures appear to be on a downward trend. However the average daily temperature variability does not appear to any significant trends that we can pick out.
 
-```{r q2.5 }
+```{r q2.5 echo=FALSE}
 Spiedbabbler%>%
     select(NestID,Date,Mass,Season)%>%
     group_by(NestID,Date,Season)%>%
@@ -296,27 +293,114 @@ Spiedbabbler%>%
     labs(title = "Average Mass per Nest Over Time,faceted per Season")+
     facet_wrap(~Season,scales='free_x')
 
-?facet_grid
-
 ```
 
-```{r q2.6}
-Spiedbabbler%>%
+```{r q2.6 echo=FALSE}
+p1 <-Spiedbabbler%>%
     mutate(year=year(Date))%>%
     select(year,Mass,BroodSize,GrpSizeTotal,No.ChicksFledge,TotRain,Season,Drought)%>%
+    na.omit%>%
     group_by(year,Season)%>%
     summarise(avg_mass=mean(Mass),mean_broodsize=mean(BroodSize),
               avg_grp_size=mean(GrpSizeTotal),avg_fledg_count=mean(No.ChicksFledge),
               avg_rain=mean(TotRain))%>%
     ggplot(aes(x=year))+
     geom_point(aes(y=avg_mass))+
-    facet_grid(~Season)
+    facet_wrap(~Season,scales = 'free_y')+
+    xlab("Year")+
+    ylab("Average Mass")
+
+p2 <-Spiedbabbler%>%
+    mutate(year=year(Date))%>%
+    select(year,Mass,BroodSize,GrpSizeTotal,No.ChicksFledge,TotRain,Season,Drought)%>%
+    na.omit%>%
+    group_by(year,Season)%>%
+    summarise(avg_mass=mean(Mass),mean_broodsize=mean(BroodSize),
+              avg_grp_size=mean(GrpSizeTotal),avg_fledg_count=mean(No.ChicksFledge),
+              avg_rain=mean(TotRain))%>%
+    ggplot(aes(x=year))+
+    geom_point(aes(y=mean_broodsize))+
+    facet_wrap(~Season,scales = 'free_y')+
+    xlab("Year")+
+    ylab("Average Brood Size")
+              
+
+p3 <-Spiedbabbler%>%
+    mutate(year=year(Date))%>%
+    select(year,Mass,BroodSize,GrpSizeTotal,No.ChicksFledge,TotRain,Season,Drought)%>%
+    na.omit%>%
+    group_by(year,Season)%>%
+    summarise(avg_mass=mean(Mass),mean_broodsize=mean(BroodSize),
+              avg_grp_size=mean(GrpSizeTotal),avg_fledg_count=mean(No.ChicksFledge),
+              avg_rain=mean(TotRain))%>%
+    ggplot(aes(x=year))+
+    geom_point(aes(y=avg_grp_size))+
+    facet_wrap(~Season,scales = 'free_y')+
+    xlab("Year")+
+    ylab("Average Total Group Size")
+                
+p4 <-Spiedbabbler%>%
+    mutate(year=year(Date))%>%
+    select(year,Mass,BroodSize,GrpSizeTotal,No.ChicksFledge,TotRain,Season,Drought)%>%
+    na.omit%>%
+    group_by(year,Season)%>%
+    summarise(avg_mass=mean(Mass),mean_broodsize=mean(BroodSize),
+              avg_grp_size=mean(GrpSizeTotal),avg_fledg_count=mean(No.ChicksFledge),
+              avg_rain=mean(TotRain))%>%
+    ggplot(aes(x=year))+
+    geom_point(aes(y=avg_fledg_count))+
+    facet_wrap(~Season,scales = 'free_y')+
+    xlab("Year")+
+    ylab("Average No. of Fledgling Chicks")
+
+p5 <-Spiedbabbler%>%
+    mutate(year=year(Date))%>%
+    select(year,Mass,BroodSize,GrpSizeTotal,No.ChicksFledge,TotRain,Season,Drought)%>%
+    na.omit%>%
+    group_by(year,Season)%>%
+    summarise(avg_mass=mean(Mass),mean_broodsize=mean(BroodSize),
+              avg_grp_size=mean(GrpSizeTotal),avg_fledg_count=mean(No.ChicksFledge),
+              avg_rain=mean(TotRain))%>%
+    ggplot(aes(x=year))+
+    geom_point(aes(y=avg_rain))+
+    facet_wrap(~Season,scales = 'free_y')+
+    xlab("Year")+
+    ylab("Average Total Rainfall")
 
 # str(Spiedbabbler)
 ```
 
-```{r q2.7}
+```{r echo=FALSE}
+p1
+```
 
+```{r echo=FALSE}
+p2
+```
+
+```{r echo=FALSE}
+p3
+```
+
+```{r echo=FALSE}
+p4
+```
+
+```{r echo=FALSE}
+p5
+```
+
+
+```{r q2.7, echo=FALSE}
+Spiedbabbler%>%
+  mutate(year=year(Date))%>%
+  select(year,BirdID,Sex)%>%
+  group_by(year,Sex)%>%
+  ggplot(aes(x=year,fill=Sex))+
+  geom_bar(position = "dodge")+
+  labs(title = "Distrubtion of Observed Sex over Time")+
+  ylab('Number of Birds')+
+  xlab("Years")
 ```
 
 
