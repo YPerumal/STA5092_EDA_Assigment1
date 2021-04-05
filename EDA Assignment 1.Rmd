@@ -10,6 +10,7 @@ knitr::opts_chunk$set(echo = FALSE)
 library(tidyverse)
 library(lubridate)
 library(ggplot2)
+library(gridExtra)
 ```
 
 ## Summary of data
@@ -118,6 +119,7 @@ d <- dim(Spiedbabbler)
 The dimensions of the merged data set are  `r d[1]` rows and `r d[2]` columns.
 
 ## Part 2
+
 The Total Sample Size Per Year:
 ```{r q2.1, echo=FALSE}
 #Total Sample Size Per Year
@@ -137,6 +139,7 @@ knitr::kable(
 )
 ```
 
+
 ```{r q2.2 Nulls}
 #Check for nulls per column
 miss_val <-Spiedbabbler %>%
@@ -144,23 +147,30 @@ miss_val <-Spiedbabbler %>%
              No.ChicksFledge,TotRain,Drought))%>%
     sapply(function(x) sum(is.na(x)))
 #Print in a nice table?
-miss_val
+# miss_val
 
-# Looking for outliers
+# ?knitr::kable
+knitr::kable(
+  miss_val, 
+  caption = "Number of Missing Values in Selected Fields",
+)
 
+```
 
+Boxplots to allow us to look for outliers:
+```{r q2.2 outliers}
+# v1
 # Spiedbabbler %>%
 #     select(c(GrpSizeAD,GrpSizeTotal,BroodSize,Mass,TMaxMeas,
 #              No.ChicksFledge,TotRain,Drought))%>%
 #     boxplot()
-```
 
 
-```{r q2.2 outliers}
+# V2
 b1<-Spiedbabbler %>%
     select(c(GrpSizeAD,GrpSizeTotal,BroodSize,Mass,TMaxMeas,
              No.ChicksFledge,TotRain,Drought))%>%
-    ggplot(aes(x=GrpSizeAD))+
+    ggplot(aes(y=GrpSizeAD))+
     geom_boxplot()
 
 b2 <- Spiedbabbler %>%
@@ -169,17 +179,66 @@ b2 <- Spiedbabbler %>%
     ggplot(aes(y=GrpSizeTotal))+
     geom_boxplot()
 
-b1
-b2
+b3<-Spiedbabbler %>%
+    select(c(GrpSizeAD,GrpSizeTotal,BroodSize,Mass,TMaxMeas,
+             No.ChicksFledge,TotRain,Drought))%>%
+    ggplot(aes(y=BroodSize))+
+    geom_boxplot()
 
+b4 <- Spiedbabbler %>%
+    select(c(GrpSizeAD,GrpSizeTotal,BroodSize,Mass,TMaxMeas,
+             No.ChicksFledge,TotRain,Drought))%>%
+    ggplot(aes(y=Mass))+
+    geom_boxplot()
+
+b5<-Spiedbabbler %>%
+    select(c(GrpSizeAD,GrpSizeTotal,BroodSize,Mass,TMaxMeas,
+             No.ChicksFledge,TotRain,Drought))%>%
+    ggplot(aes(y=TMaxMeas))+
+    geom_boxplot()
+
+b6 <- Spiedbabbler %>%
+    select(c(GrpSizeAD,GrpSizeTotal,BroodSize,Mass,TMaxMeas,
+             No.ChicksFledge,TotRain,Drought))%>%
+    ggplot(aes(y=No.ChicksFledge))+
+    geom_boxplot()
+
+b7<-Spiedbabbler %>%
+    select(c(GrpSizeAD,GrpSizeTotal,BroodSize,Mass,TMaxMeas,
+             No.ChicksFledge,TotRain,Drought))%>%
+    ggplot(aes(y=TotRain))+
+    geom_boxplot()
+
+b8 <- Spiedbabbler %>%
+    select(c(GrpSizeAD,GrpSizeTotal,BroodSize,Mass,TMaxMeas,
+             No.ChicksFledge,TotRain,Drought))%>%
+    ggplot(aes(y=Drought))+
+    geom_boxplot()
+
+grid.arrange(b1,b2,b3,b4,b5,b6,b7,b8, nrow = 2,ncol=4)
 ```
-Definition of an outlier is those that are more than 3???? standard deviations away from the mean
+An outlier is an observation that lies 1.5 times the interquartile range, either below the lower quartile or above the upper quartile i.e. any obersvations further out than the "whiskers' on a box plot.
+
+The following variables appear to have 1 or more outliers:
+* GrpSizeAD
+* GrpSizeTotal
+* BroodSize
+* Mass
+* TMaxMeas
+
+The following variable appear to not have outliers:
+* No.ChicksFledge
+* TotRain
+
+The variable Drought appears to be a binary indicator (1/0) as to whether a drought occurred in that year, and thus would not have any outliers (unless there were errors in the data).
 
 ```{r q2.3 per nest per date mass}
 mass_by_nest<-Spiedbabbler%>%
     select(NestID,Date,Mass)%>%
-    group_by(NestID)
-    
+    group_by(NestID,Date)%>%
+    summarise('Average Mass'=round(mean(Mass),2),'Total Mass'=sum(Mass))%>%
+    arrange(NestID,Date)
+mass_by_nest    
 knitr::kable(
   head(mass_by_nest,5), 
   caption = "Preview of DataFrame Mass and Date per Nest"
@@ -197,13 +256,34 @@ unique(Spiedbabbler$Season)
 #     select(Season,TMaxMeas,TMinMeas,TvarMeas)
 #     na.omit()%>%
    # summarise(average_high_temp=mean(TMaxMeas),average_low_temp=mean(TMinMeas))%>%
-       
-Spiedbabbler%>%
-    select(Date,Season,TMaxMeas,TMinMeas)%>%
-    ggplot(aes(x=Date,y=TMaxMeas,color=Season))+
-    geom_point(na.rm = T)
-```
+# sum(is.na(Spiedbabbler$TvarMeas))
 
+diff <-Spiedbabbler%>%
+    select(Season,TvarMeas,TMaxMeas,TMinMeas)%>%
+    na.omit()%>% #There are null values for some observations
+    group_by(Season)%>%
+    summarise('Average Daily Change Temperature'=round(mean(TvarMeas),2),'
+              Max Temp Observed'=round(max(TMaxMeas),2),
+              'Min Temp Observed'=round(min(TMinMeas),2))
+
+diff
+
+
+# %>%
+#     mutate(rn=row_number())
+
+
+# knitr::kable(
+#   diff, 
+#   caption = "Comparison of Temperature Measures per Season"
+# )
+# plto_labs <- list(diff$Season)
+# typeof(plto_labs)
+# diff %>% ggplot(aes(x=factor(rn),y=mean_change))+
+#           geom_point(aes(type='l')) +
+#           scale_x_discrete(breaks = 1:13, labels=plto_labs)
+```
+From the table we see that both maximum and minimum temperatures appear to be on a downward trend. However the average daily temperature variability does not appear to any significant trends that we can pick out.
 
 ```{r q2.5 }
 Spiedbabbler%>%
@@ -212,7 +292,11 @@ Spiedbabbler%>%
     summarise(avg_mass=mean(Mass))%>%
     ggplot(aes(x=Date,y=avg_mass,color=Season))+
     geom_point()+
-    facet_wrap(~Season)
+    ylab("Season")+
+    labs(title = "Average Mass per Nest Over Time,faceted per Season")+
+    facet_wrap(~Season,scales='free_x')
+
+?facet_grid
 
 ```
 
