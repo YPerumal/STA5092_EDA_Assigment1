@@ -17,11 +17,9 @@ library(gridExtra)
 The data set is availale at the following link:
 https://zivahub.uct.ac.za/articles/dataset/Southern_Pied_Babbler_nestling_mass_tarsus_length_and_survival/12441899
 
-Data were collected for each austral summer breeding season from September 2005Febru- ary 2019 (14 breeding seasons in total).
+Data were collected for each austral summer breeding season from September 2005February 2019 (14 breeding seasons in total).
 
 ## Part 1 - Data Wrangling
-
-
 ```{r Import Data q2, include=FALSE}
 # First Import Nestling comes first
 df1 <- read.csv("./Datasets/Data.Bourne_NestlingsAllData.csv", header = TRUE)
@@ -44,25 +42,25 @@ A preview of the dataset named Data.Bourne_NestlingsAllData.csv
 head(df1,5)
 # sum(is.na(df1$Date)) #No nulls in the date column
 ```
-
-
+\newpage
 A preview of the dataset named Data.Bourne_FledglingSurvival.csv
-```{r df2 echo=FALSE} 
+```{r df2 ,echo=FALSE} 
 head(df2,5)
 # sum(is.na(df2$Date)) #No nulls in the date column
 ```
 A preview of the dataset named Data.Bourne_NestSuccess.csv:
-```{r df3 echo=FALSE}
+```{r df3 ,echo=FALSE}
 head(df3,5)
 ```
-
 Before merging the Nestling and Fledgling dataframes, several actions need to be taken to cleanse the data and make it ready. They are detailed below:
+
 ### Fledgeling data
 * Convert all date related fields from character  to date format
 * Remove any potential whitespace from character fields
 * convert Surv1Mass,GrpSizeAD,GrpSizeTotal and X.Imm to numeric type from character.
 * Renaming GRP to Group
 
+\newpage
 ### Nestling data
 * Convert date related field to date format
 * Convert Surv1Mass to numeric
@@ -103,7 +101,7 @@ df2 <- df2 %>%
     arrange(BirdID,Date,Group,Season)
 ```
 
-```{r merge q1.3 ,echo=FALSE}
+```{r merge q1.3, include=FALSE}
 #V1
 # Spiedbabbler <- df1%>% left_join(df2,by=c('Date','BirdID','Group','Season','NestID'))
 
@@ -119,8 +117,7 @@ d <- dim(Spiedbabbler)
 The dimensions of the merged data set are  `r d[1]` rows and `r d[2]` columns.
 
 ## Part 2
-
-The Total Sample Size Per Year:
+2.1)The Total Sample Size Per Year:
 ```{r q2.1, echo=FALSE}
 #Total Sample Size Per Year
 size_per_year <-Spiedbabbler %>%
@@ -138,8 +135,7 @@ knitr::kable(
   caption = "The Total Sample Size Per Year"
 )
 ```
-
-
+2.2.1) Checking for Nulls
 ```{r q2.2 Nulls,echo=FALSE}
 #Check for nulls per column
 miss_val <-Spiedbabbler %>%
@@ -156,70 +152,72 @@ knitr::kable(
 )
 
 ```
+\newpage
+2.2.2)Boxplots to allow us to look for outliers:
 
-Boxplots to allow us to look for outliers:
-```{r q2.2 outliers echo=FALSE}
+```{r q2.2 outliers, echo=FALSE}
 # v1
 # Spiedbabbler %>%
 #     select(c(GrpSizeAD,GrpSizeTotal,BroodSize,Mass,TMaxMeas,
 #              No.ChicksFledge,TotRain,Drought))%>%
 #     boxplot()
 
-
 # V2
 b1<-Spiedbabbler %>%
     select(c(GrpSizeAD,GrpSizeTotal,BroodSize,Mass,TMaxMeas,
              No.ChicksFledge,TotRain,Drought))%>%
     ggplot(aes(y=GrpSizeAD))+
-    geom_boxplot()
+    geom_boxplot(na.rm = T)
 
 b2 <- Spiedbabbler %>%
     select(c(GrpSizeAD,GrpSizeTotal,BroodSize,Mass,TMaxMeas,
              No.ChicksFledge,TotRain,Drought))%>%
     ggplot(aes(y=GrpSizeTotal))+
-    geom_boxplot()
+    geom_boxplot(na.rm = T)
 
 b3<-Spiedbabbler %>%
     select(c(GrpSizeAD,GrpSizeTotal,BroodSize,Mass,TMaxMeas,
              No.ChicksFledge,TotRain,Drought))%>%
     ggplot(aes(y=BroodSize))+
-    geom_boxplot()
+    geom_boxplot(na.rm = T)
 
 b4 <- Spiedbabbler %>%
     select(c(GrpSizeAD,GrpSizeTotal,BroodSize,Mass,TMaxMeas,
              No.ChicksFledge,TotRain,Drought))%>%
     ggplot(aes(y=Mass))+
-    geom_boxplot()
+    geom_boxplot(na.rm = T)
 
 b5<-Spiedbabbler %>%
     select(c(GrpSizeAD,GrpSizeTotal,BroodSize,Mass,TMaxMeas,
              No.ChicksFledge,TotRain,Drought))%>%
     ggplot(aes(y=TMaxMeas))+
-    geom_boxplot()
+    geom_boxplot(na.rm = T)
 
 b6 <- Spiedbabbler %>%
     select(c(GrpSizeAD,GrpSizeTotal,BroodSize,Mass,TMaxMeas,
              No.ChicksFledge,TotRain,Drought))%>%
     ggplot(aes(y=No.ChicksFledge))+
-    geom_boxplot()
+    geom_boxplot(na.rm = T)
 
 b7<-Spiedbabbler %>%
     select(c(GrpSizeAD,GrpSizeTotal,BroodSize,Mass,TMaxMeas,
              No.ChicksFledge,TotRain,Drought))%>%
     ggplot(aes(y=TotRain))+
-    geom_boxplot()
+    geom_boxplot(na.rm = T)
 
 b8 <- Spiedbabbler %>%
     select(c(GrpSizeAD,GrpSizeTotal,BroodSize,Mass,TMaxMeas,
              No.ChicksFledge,TotRain,Drought))%>%
     ggplot(aes(y=Drought))+
-    geom_boxplot()
+    geom_boxplot(na.rm = T)
 
 grid.arrange(b1,b2,b3,b4,b5,b6,b7,b8, nrow = 2,ncol=4)
 ```
+
 An outlier is an observation that lies 1.5 times the interquartile range, either below the lower quartile or above the upper quartile i.e. any obersvations further out than the "whiskers' on a box plot.
 
 The following variables appear to have 1 or more outliers:
+
 * GrpSizeAD
 * GrpSizeTotal
 * BroodSize
@@ -227,19 +225,20 @@ The following variables appear to have 1 or more outliers:
 * TMaxMeas
 
 The following variable appear to not have outliers:
+
 * No.ChicksFledge
 * TotRain
 
 The variable Drought appears to be a binary indicator (1/0) as to whether a drought occurred in that year, and thus would not have any outliers (unless there were errors in the data).
 
-```{r q2.3 per nest per date mass echo=FALSE}
+2.3)
+```{r q2.3 per nest per date mass, echo=FALSE, message=FALSE}
 mass_by_nest<-Spiedbabbler%>%
     select(NestID,Date,Mass)%>%
     group_by(NestID,Date)%>%
     summarise('Average Mass'=round(mean(Mass),2),'Total Mass'=sum(Mass))%>%
     arrange(NestID,Date)
 
-mass_by_nest    
 knitr::kable(
   head(mass_by_nest,5), 
   caption = "Preview of DataFrame Mass and Date per Nest"
@@ -247,8 +246,8 @@ knitr::kable(
 ```
 The dimensions of the table are `r dim(mass_by_nest)[1]` rows and `r dim(mass_by_nest)[2]` columns.
 
-NEED TO COME BACK TO THIS ONE
-```{r q2.4 echo=FALSE} 
+2.4)
+```{r q2.4 ,echo=FALSE} 
 # Spiedbabbler%>%
 #     select(Season,TMaxMeas,TMinMeas,TvarMeas)
 #     na.omit()%>%
@@ -259,21 +258,21 @@ diff <-Spiedbabbler%>%
     select(Season,TvarMeas,TMaxMeas,TMinMeas)%>%
     na.omit()%>% #There are null values for some observations
     group_by(Season)%>%
-    summarise('Average Daily Change Temperature'=round(mean(TvarMeas),2),'
-              Max Temp Observed'=round(max(TMaxMeas),2),
-              'Min Temp Observed'=round(min(TMinMeas),2))
+    summarise('Avg Tmp Range'=mean(TvarMeas),'
+              Max Temp'=max(TMaxMeas),
+              'Min Temp'=min(TMinMeas))
 
 diff
 
 
 # %>%
 #     mutate(rn=row_number())
-
-
-# knitr::kable(
-#   diff, 
-#   caption = "Comparison of Temperature Measures per Season"
-# )
+knitr::kable(
+  diff,
+  caption = "Comparison of Temperature Measures per Season",
+  "html",
+  digits=2
+)
 # plto_labs <- list(diff$Season)
 # typeof(plto_labs)
 # diff %>% ggplot(aes(x=factor(rn),y=mean_change))+
@@ -282,20 +281,24 @@ diff
 ```
 From the table we see that both maximum and minimum temperatures appear to be on a downward trend. However the average daily temperature variability does not appear to any significant trends that we can pick out.
 
-```{r q2.5 echo=FALSE}
+2.5)
+
+```{r q2.5, echo=FALSE, message=FALSE}
 Spiedbabbler%>%
     select(NestID,Date,Mass,Season)%>%
     group_by(NestID,Date,Season)%>%
     summarise(avg_mass=mean(Mass))%>%
     ggplot(aes(x=Date,y=avg_mass,color=Season))+
-    geom_point()+
+    geom_point(na.rm = T)+
     ylab("Season")+
     labs(title = "Average Mass per Nest Over Time,faceted per Season")+
     facet_wrap(~Season,scales='free_x')
 
 ```
+\newpage
+2.6)
 
-```{r q2.6 echo=FALSE}
+```{r q2.6, echo=FALSE, message=FALSE}
 p1 <-Spiedbabbler%>%
     mutate(year=year(Date))%>%
     select(year,Mass,BroodSize,GrpSizeTotal,No.ChicksFledge,TotRain,Season,Drought)%>%
@@ -370,26 +373,22 @@ p5 <-Spiedbabbler%>%
 # str(Spiedbabbler)
 ```
 
-```{r echo=FALSE}
+```{r echo=FALSE ,fig.height=4, fig.width=10}
 p1
 ```
-
-```{r echo=FALSE}
+```{r echo=FALSE,fig.height=4, fig.width=10}
 p2
 ```
-
-```{r echo=FALSE}
+```{r echo=FALSE,fig.height=4, fig.width=10}
 p3
 ```
-
-```{r echo=FALSE}
+```{r echo=FALSE,fig.height=4, fig.width=10}
 p4
 ```
-
-```{r echo=FALSE}
+```{r echo=FALSE,fig.height=4, fig.width=10}
 p5
 ```
-
+2.7)
 
 ```{r q2.7, echo=FALSE}
 Spiedbabbler%>%
