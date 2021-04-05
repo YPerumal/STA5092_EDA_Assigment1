@@ -241,56 +241,42 @@ The dimensions of the table are `r dim(mass_by_nest)[1]` rows and `r dim(mass_by
 
 2.4)
 ```{r q2.4 ,echo=FALSE} 
-# Spiedbabbler%>%
-#     select(Season,TMaxMeas,TMinMeas,TvarMeas)
-#     na.omit()%>%
-   # summarise(average_high_temp=mean(TMaxMeas),average_low_temp=mean(TMinMeas))%>%
-# sum(is.na(Spiedbabbler$TvarMeas))
-
-diff <-Spiedbabbler%>%
-    select(Season,TvarMeas,TMaxMeas,TMinMeas)%>%
-    na.omit()%>% #There are null values for some observations
-    group_by(Season)%>%
-    summarise('Avg Tmp Range'=mean(TvarMeas),'
-              Max Temp'=max(TMaxMeas),
-              'Min Temp'=min(TMinMeas))
-
-diff
-
-
-# %>%
-#     mutate(rn=row_number())
-# knitr::kable(
-#   diff,
-#   caption = "Comparison of Temperature Measures per Season",
-#   digits=2
-# )
-
-
-# plto_labs <- list(diff$Season)
-# typeof(plto_labs)
-# diff %>% ggplot(aes(x=factor(rn),y=mean_change))+
-#           geom_point(aes(type='l')) +
-#           scale_x_discrete(breaks = 1:13, labels=plto_labs)
+Spiedbabbler%>%
+  select(Date,TvarMeas,TMinMeas,TMaxMeas,Season)%>%
+  mutate(month=month(Date,label = TRUE))%>%
+  na.omit%>%
+  group_by(month,Season)%>%
+  summarise(mean_temp_range=mean(TvarMeas),mean_min=mean(TMinMeas),mean_max=mean(TMaxMeas))%>%
+  ggplot(aes(x=month))+
+  geom_point(aes(y=mean_temp_range),na.rm=T,colour="orange")+
+  geom_point(aes(y=mean_min),na.rm=T,colour="blue")+
+  geom_point(aes(y=mean_max),na.rm=T,colour="red")+
+  theme(axis.text.x = element_text(angle = 90))+   
+  facet_wrap(~Season)+
+  ylab("Seasons")+
+  xlab("Month")+
+  labs(title = "Comparison of Various Monthly Average Temperature Metrics by Season")
 ```
-From the table we see that both maximum and minimum temperatures appear to be on a downward trend. However the average daily temperature variability does not appear to any significant trends that we can pick out.
+The figure above shows us how the average temperature range, the average maximum temperature and the average minimum temperature changed on a monthly basis for different seasons. This gives us an of whether one season had more extreme temperatures and temperature variance when compared to another.
 
 2.5)
 
-```{r q2.5, echo=FALSE, message=FALSE}
+```{r q2.5, echo=FALSE, message=FALSE,fig.height=8, fig.width=15}
 #Create the required plot
 Spiedbabbler%>%
     select(NestID,Date,Mass,Season)%>%
     group_by(NestID,Date,Season)%>%
     summarise(sum_mass=sum(Mass))%>%
+    arrange(Date)%>%
     ggplot(aes(x=Date,y=sum_mass,color=Season))+
     geom_point(na.rm = T)+
     ylab("Season")+
     labs(title = "Average Mass per Nest Over Time,faceted per Season")+
     facet_wrap(~Season,scales='free_x')
+    # theme(axis.text.x = element_text(angle=45, vjust=0.5))
 
+Spiedbabbler$Date
 ```
-*Apologies for the squashed axis on the graphics.
 \newpage
 2.6)
 
