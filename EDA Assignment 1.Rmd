@@ -1,7 +1,7 @@
 ---
 title: "STA5092Z: Assigment 1"
 author: "Yevashan Perumal"
-date: "3/30/2021"
+date: "05/04/2021"
 output: pdf_document
 ---
 
@@ -14,7 +14,7 @@ library(gridExtra)
 ```
 
 ## Summary of data
-Data were collected for each austral summer breeding season from September 2005February 2019 (14 breeding seasons in total).
+Data were collected for each breeding season from September 2005 - February 2019 for the Southern Pied Babbler.
 The data consists of 6 csv files; 3 files containing data and 3 files containing metadata describing the fields in each data set. Below we import, wrangle and explore some of the data.
 
 ## Part 1 - Data Wrangling
@@ -49,14 +49,14 @@ head(df3,5)
 ```
 Before merging the Nestling and Fledgling dataframes, several actions need to be taken to cleanse the data and make it ready. They are detailed below:
 
-### Fledgeling data
+### Nestling data
 * Convert all date related fields from character  to date format
 * Remove any potential whitespace from character fields
-* convert Surv1Mass,GrpSizeAD,GrpSizeTotal and X.Imm to numeric type from character.
+* Convert Surv1Mass,GrpSizeAD,GrpSizeTotal and X.Imm to numeric type from character.
 * Renaming GRP to Group
 
 \newpage
-### Nestling data
+### Fledgling data
 * Convert date related field to date format
 * Convert Surv1Mass to numeric
 * Remove whitespaces from character fields
@@ -222,7 +222,7 @@ The following variable appear to not have outliers:
 * TotRain
 
 The variable Drought appears to be a binary indicator (1/0) as to whether a drought occurred, and thus would not have any outliers; despite what the boxplot appears to indicate "1" is a valid observation and not an outlier
-
+\newpage
 2.3)
 ```{r q2.3 per nest per date mass, echo=FALSE, message=FALSE}
 #Code to find total mass per nest per date
@@ -240,7 +240,7 @@ knitr::kable(
 The dimensions of the table are `r dim(mass_by_nest)[1]` rows and `r dim(mass_by_nest)[2]` columns.
 
 2.4)
-```{r q2.4 ,echo=FALSE} 
+```{r q2.4, echo=FALSE, message=FALSE}
 Spiedbabbler%>%
   select(Date,TvarMeas,TMinMeas,TMaxMeas,Season)%>%
   mutate(month=month(Date,label = TRUE))%>%
@@ -248,14 +248,16 @@ Spiedbabbler%>%
   group_by(month,Season)%>%
   summarise(mean_temp_range=mean(TvarMeas),mean_min=mean(TMinMeas),mean_max=mean(TMaxMeas))%>%
   ggplot(aes(x=month))+
-  geom_point(aes(y=mean_temp_range),na.rm=T,colour="orange")+
-  geom_point(aes(y=mean_min),na.rm=T,colour="blue")+
-  geom_point(aes(y=mean_max),na.rm=T,colour="red")+
+  geom_point(aes(y=mean_temp_range,color='orange'),na.rm=T)+
+  geom_point(aes(y=mean_min,color='blue'),na.rm=T)+
+  geom_point(aes(y=mean_max,color='red'),na.rm=T)+
   theme(axis.text.x = element_text(angle = 90))+   
   facet_wrap(~Season)+
   ylab("Seasons")+
   xlab("Month")+
-  labs(title = "Comparison of Various Monthly Average Temperature Metrics by Season")
+  labs(title = "Comparison of Various Monthly Average Temperature Metrics by Season")+
+  scale_color_hue(name = "Temp Variable",labels = c("Avg Daily Temp Range", "Avg Min Temp","Avg Max Temp"))
+?scale_color_hue
 ```
 The figure above shows us how the average temperature range, the average maximum temperature and the average minimum temperature changed on a monthly basis for different seasons. This gives us an of whether one season had more extreme temperatures and temperature variance when compared to another.
 
@@ -274,12 +276,9 @@ Spiedbabbler%>%
     labs(title = "Average Mass per Nest Over Time,faceted per Season")+
     facet_wrap(~Season,scales='free_x')
     # theme(axis.text.x = element_text(angle=45, vjust=0.5))
-
-Spiedbabbler$Date
 ```
 \newpage
 2.6)
-
 ```{r q2.6, echo=FALSE, message=FALSE}
 #Create year column,find averages, then craete a facet on Season for each variable.
 
@@ -386,9 +385,6 @@ Therefore it makes sense to plot a graphic with an environmental factor such as 
 #   ylab('Number of Birds')+
 #   xlab("Years")+
 #   geom_line(aes(y=TMaxMeas))
-
-sum(is.na(Spiedbabbler$SurvInd))
-unique(Spiedbabbler$SurvInd)
 
 Spiedbabbler%>%
   select(Season,SurvInd,TMaxMeas)%>%
