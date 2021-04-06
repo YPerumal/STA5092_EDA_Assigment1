@@ -276,13 +276,14 @@ Spiedbabbler%>%
     ggplot(aes(x=Date,y=sum_mass,color=Season))+
     geom_point(na.rm = T)+
     ylab("Season")+
-    labs(title = "Average Mass per Nest Over Time,faceted per Season")+
+    labs(title = "Total Mass per Nest Over Time,faceted per Season")+
     facet_wrap(~Season,scales='free_x')
     # theme(axis.text.x = element_text(angle=45, vjust=0.5))
 ```
-A quick overview does not reveal any obvious trends of how the total mass of nests may have changed over time.
+A quick overview does not reveal any obvious trends of how the total mass per nests may have changed over time.
 
-2.6)
+2.6) 
+Plotting selected variables, faceted by Season.
 ```{r q2.6, echo=FALSE, message=FALSE}
 #Create year column,find averages, then create a facet on Season for each variable.
 
